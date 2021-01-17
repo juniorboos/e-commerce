@@ -19,6 +19,7 @@ const Head: FC<Props> = ({ products }) => {
               variant="simple"
               imgWidth={240}
               imgHeight={240}
+              relation={true}
             />
           ))}
         </Grid>

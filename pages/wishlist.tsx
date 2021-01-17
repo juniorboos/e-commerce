@@ -1,30 +1,30 @@
 import type { GetStaticPropsContext } from 'next'
-import { getConfig } from '@bigcommerce/storefront-data-hooks/api'
-import getAllPages from '@bigcommerce/storefront-data-hooks/api/operations/get-all-pages'
-import useWishlist from '@bigcommerce/storefront-data-hooks/wishlist/use-wishlist'
+// import { getConfig } from '@bigcommerce/storefront-data-hooks/api'
+// import getAllPages from '@bigcommerce/storefront-data-hooks/api/operations/get-all-pages'
+// import useWishlist from '@bigcommerce/storefront-data-hooks/wishlist/use-wishlist'
 import { Layout } from '@components/common'
 import { Heart } from '@components/icons'
 import { Text, Container } from '@components/ui'
 import { WishlistCard } from '@components/wishlist'
 import { defatultPageProps } from '@lib/defaults'
 
-export async function getStaticProps({
-  preview,
-  locale,
-}: GetStaticPropsContext) {
-  const config = getConfig({ locale })
-  const { pages } = await getAllPages({ config, preview })
-  return {
-    props: { ...defatultPageProps, pages },
-  }
-}
+// export async function getStaticProps({
+//   preview,
+//   locale,
+// }: GetStaticPropsContext) {
+//   const config = getConfig({ locale })
+//   const { pages } = await getAllPages({ config, preview })
+//   return {
+//     props: { ...defatultPageProps, pages },
+//   }
+// }
 
 export default function Wishlist() {
-  const { data, isEmpty } = useWishlist({ includeProducts: true })
+  // const { data, isEmpty } = useWishlist({ includeProducts: true })
 
   return (
     <Container>
-      <div className="mt-3 mb-20">
+      {/* <div className="mt-3 mb-20">
         <Text variant="pageHeading">My Wishlist</Text>
         <div className="group flex flex-col">
           {isEmpty ? (
@@ -46,7 +46,7 @@ export default function Wishlist() {
             ))
           )}
         </div>
-      </div>
+      </div> */}
     </Container>
   )
 }

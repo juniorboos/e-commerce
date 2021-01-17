@@ -3,10 +3,6 @@ import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { getConfig } from '@bigcommerce/storefront-data-hooks/api'
-import getAllPages from '@bigcommerce/storefront-data-hooks/api/operations/get-all-pages'
-import getSiteInfo from '@bigcommerce/storefront-data-hooks/api/operations/get-site-info'
-import useSearch from '@bigcommerce/storefront-data-hooks/products/use-search'
 import { Layout } from '@components/common'
 import { ProductCard } from '@components/product'
 import { Container, Grid, Skeleton } from '@components/ui'
@@ -82,7 +78,7 @@ export default function Search({
               <span className="rounded-md shadow-sm">
                 <button
                   type="button"
-                  onClick={(e) => handleClick(e, 'categories')}
+                  onClick={() => handleClick()}
                   className="flex justify-between w-full rounded-sm border border-gray-300 px-4 py-3 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-50 active:text-gray-800 transition ease-in-out duration-150"
                   id="options-menu"
                   aria-haspopup="true"
@@ -233,7 +229,7 @@ export default function Search({
               <span className="rounded-md shadow-sm">
                 <button
                   type="button"
-                  onClick={(e) => handleClick(e, 'sort')}
+                  onClick={(e) => handleClick()}
                   className="flex justify-between w-full rounded-sm border border-gray-300 px-4 py-3 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-50 active:text-gray-800 transition ease-in-out duration-150"
                   id="options-menu"
                   aria-haspopup="true"
@@ -277,7 +273,7 @@ export default function Search({
                     >
                       <Link href={{ pathname, query: filterQuery({ q }) }}>
                         <a
-                          onClick={(e) => handleClick(e, 'sort')}
+                          onClick={(e) => handleClick()}
                           className={
                             'block lg:inline-block px-4 py-2 lg:p-0 lg:my-2 lg:mx-4'
                           }
@@ -303,7 +299,7 @@ export default function Search({
                           }}
                         >
                           <a
-                            onClick={(e) => handleClick(e, 'sort')}
+                            onClick={(e) => handleClick()}
                             className={
                               'block lg:inline-block px-4 py-2 lg:p-0 lg:my-2 lg:mx-4'
                             }

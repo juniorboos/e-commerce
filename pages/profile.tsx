@@ -1,23 +1,13 @@
 import type { GetStaticPropsContext } from 'next'
-import { getConfig } from '@bigcommerce/storefront-data-hooks/api'
-import getAllPages from '@bigcommerce/storefront-data-hooks/api/operations/get-all-pages'
-import useCustomer from '@bigcommerce/storefront-data-hooks/use-customer'
 import { Layout } from '@components/common'
 import { Container, Text } from '@components/ui'
 
-export async function getStaticProps({
-  preview,
-  locale,
-}: GetStaticPropsContext) {
-  const config = getConfig({ locale })
-  const { pages } = await getAllPages({ config, preview })
-  return {
-    props: { pages },
-  }
-}
-
 export default function Profile() {
-  const { data } = useCustomer()
+  const data = {
+    firstName: 'Milton',
+    lastName: 'Boos',
+    email: 'miltonboos@gmail.com',
+  }
   return (
     <Container>
       <Text variant="pageHeading">My Profile</Text>

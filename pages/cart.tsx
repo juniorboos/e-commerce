@@ -1,44 +1,27 @@
 import type { GetStaticPropsContext } from 'next'
-import { getConfig } from '@bigcommerce/storefront-data-hooks/api'
-import getAllPages from '@bigcommerce/storefront-data-hooks/api/operations/get-all-pages'
-import useCart from '@bigcommerce/storefront-data-hooks/cart/use-cart'
-import usePrice from '@bigcommerce/storefront-data-hooks/use-price'
+import { useEffect, useState } from 'react'
 import { Layout } from '@components/common'
 import { Button } from '@components/ui'
 import { Bag, Cross, Check } from '@components/icons'
 import { CartItem } from '@components/cart'
 import { Text } from '@components/ui'
-
-export async function getStaticProps({
-  preview,
-  locale,
-}: GetStaticPropsContext) {
-  const config = getConfig({ locale })
-  const { pages } = await getAllPages({ config, preview })
-  return {
-    props: { pages },
-  }
-}
+import { useUI } from '@components/ui/context'
 
 export default function Cart() {
-  const { data, isEmpty } = useCart()
-  const { price: subTotal } = usePrice(
-    data && {
-      amount: data.base_amount,
-      currencyCode: data.currency.code,
-    }
-  )
-  const { price: total } = usePrice(
-    data && {
-      amount: data.cart_amount,
-      currencyCode: data.currency.code,
-    }
-  )
+  const { getCartItems } = useUI()
 
-  const items = data?.line_items.physical_items ?? []
-
+  const [total, setTotal] = useState(0)
+  const isEmpty = true
   const error = null
   const success = null
+  const items = getCartItems()
+
+  useEffect(() => {
+    const prices = items.map((item: any) => {
+      return Number(item.price.substring(1))
+    })
+    setTotal(prices.reduce((a: number, b: number) => a + b, 0).toFixed(2))
+  }, [items])
 
   return (
     <div className="grid lg:grid-cols-12">
@@ -79,12 +62,8 @@ export default function Cart() {
             <Text variant="pageHeading">My Cart</Text>
             <Text variant="sectionHeading">Review your Order</Text>
             <ul className="py-6 space-y-6 sm:py-0 sm:space-y-0 sm:divide-y sm:divide-accents-2 border-b border-accents-2">
-              {items.map((item) => (
-                <CartItem
-                  key={item.id}
-                  item={item}
-                  currencyCode={data?.currency.code!}
-                />
+              {items.map((item: any) => (
+                <CartItem key={item.id} item={item} />
               ))}
             </ul>
             <div className="my-6">
@@ -104,20 +83,6 @@ export default function Cart() {
       <div className="lg:col-span-4">
         <div className="flex-shrink-0 px-4 py-24 sm:px-6">
           <div className="border-t border-accents-2">
-            <ul className="py-3">
-              <li className="flex justify-between py-1">
-                <span>Subtotal</span>
-                <span>{subTotal}</span>
-              </li>
-              <li className="flex justify-between py-1">
-                <span>Taxes</span>
-                <span>Calculated at checkout</span>
-              </li>
-              <li className="flex justify-between py-1">
-                <span>Estimated Shipping</span>
-                <span className="font-bold tracking-wide">FREE</span>
-              </li>
-            </ul>
             <div className="flex justify-between border-t border-accents-2 py-3 font-bold mb-10">
               <span>Total</span>
               <span>{total}</span>

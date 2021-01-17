@@ -7,8 +7,10 @@ import usePrice from '@bigcommerce/storefront-data-hooks/use-price'
 import useUpdateItem from '@bigcommerce/storefront-data-hooks/cart/use-update-item'
 import useRemoveItem from '@bigcommerce/storefront-data-hooks/cart/use-remove-item'
 import s from './CartItem.module.css'
+import { useUI } from '@components/ui/context'
 
 const CartItem = ({ item }: { item: any }) => {
+  const { removeCartItem } = useUI()
   const updateItem = useUpdateItem(item)
   const removeItem = useRemoveItem()
   const [quantity, setQuantity] = useState(1)
@@ -35,15 +37,7 @@ const CartItem = ({ item }: { item: any }) => {
     }
   }
   const handleRemove = async () => {
-    setRemoving(true)
-
-    try {
-      // If this action succeeds then there's no need to do `setRemoving(true)`
-      // because the component will be removed from the view
-      await removeItem({ id: item.id })
-    } catch (error) {
-      setRemoving(false)
-    }
+    removeCartItem(item.id)
   }
 
   return (

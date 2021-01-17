@@ -59,6 +59,10 @@ type Action =
       item: any
     }
   | {
+      type: 'REMOVE_CART_ITEM'
+      id: any
+    }
+  | {
       type: 'RESET_CART'
     }
 
@@ -75,6 +79,16 @@ function uiReducer(state: State, action: Action) {
       return {
         ...state,
         cartItems: [...state.cartItems, action.item],
+      }
+    }
+    case 'REMOVE_CART_ITEM': {
+      const cartItems = state.cartItems.filter(function (obj) {
+        return obj.id !== action.id
+      })
+
+      return {
+        ...state,
+        cartItems,
       }
     }
     case 'RESET_CART': {
@@ -171,6 +185,7 @@ export const UIProvider: FC = (props) => {
     dispatch({ type: 'SET_MODAL_VIEW', view })
 
   const addCartItem = (item: any) => dispatch({ type: 'ADD_CART_ITEM', item })
+  const removeCartItem = (id: any) => dispatch({ type: 'REMOVE_CART_ITEM', id })
 
   const resetCart = () => dispatch({ type: 'RESET_CART' })
 
@@ -193,6 +208,7 @@ export const UIProvider: FC = (props) => {
       openToast,
       closeToast,
       addCartItem,
+      removeCartItem,
       resetCart,
       getCartItems,
     }),

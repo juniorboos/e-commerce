@@ -3,10 +3,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { FC } from 'react'
 import s from './ProductCard.module.css'
-import WishlistButton from '@components/wishlist/WishlistButton'
-
-import usePrice from '@bigcommerce/storefront-data-hooks/use-price'
-import type { ProductNode } from '@bigcommerce/storefront-data-hooks/api/operations/get-all-products'
 
 interface Product {
   id: number
@@ -18,6 +14,7 @@ interface Product {
   category: Array<string>
   brand: any
   url: string
+  relation: number
 }
 
 interface Props {
@@ -30,6 +27,7 @@ interface Props {
   imgPriority?: boolean
   imgLoading?: 'eager' | 'lazy'
   imgSizes?: string
+  relation?: boolean
 }
 
 const ProductCard: FC<Props> = ({
@@ -41,15 +39,9 @@ const ProductCard: FC<Props> = ({
   imgPriority,
   imgLoading,
   imgSizes,
+  relation,
   imgLayout = 'responsive',
 }) => {
-  // const src = p.images.edges?.[0]?.node?.urlOriginal!
-  // const { price } = usePrice({
-  //   amount: p.prices?.price?.value,
-  //   baseAmount: p.prices?.retailPrice?.value,
-  //   currencyCode: p.prices?.price?.currencyCode!,
-  // })
-
   return (
     <Link href={`/product/${product.id}`}>
       <a
@@ -83,7 +75,9 @@ const ProductCard: FC<Props> = ({
                 <h3 className={s.productTitle}>
                   <span>{product.name}</span>
                 </h3>
-                <span className={s.productPrice}>{product.price}</span>
+                <span className={s.productPrice}>
+                  {product.price} {relation && '(' + product.relation + ')'}
+                </span>
               </div>
               {/* <WishlistButton className={s.wishlistButton} /> */}
             </div>
