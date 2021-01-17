@@ -8,31 +8,16 @@ import useUpdateItem from '@bigcommerce/storefront-data-hooks/cart/use-update-it
 import useRemoveItem from '@bigcommerce/storefront-data-hooks/cart/use-remove-item'
 import s from './CartItem.module.css'
 
-const CartItem = ({
-  item,
-  currencyCode,
-}: {
-  item: any
-  currencyCode: string
-}) => {
-  const { price } = usePrice({
-    amount: item.extended_sale_price,
-    baseAmount: item.extended_list_price,
-    currencyCode,
-  })
+const CartItem = ({ item }: { item: any }) => {
   const updateItem = useUpdateItem(item)
   const removeItem = useRemoveItem()
-  const [quantity, setQuantity] = useState(item.quantity)
+  const [quantity, setQuantity] = useState(1)
   const [removing, setRemoving] = useState(false)
   const updateQuantity = async (val: number) => {
     await updateItem({ quantity: val })
   }
   const handleQuantity = (e: ChangeEvent<HTMLInputElement>) => {
     const val = Number(e.target.value)
-
-    if (Number.isInteger(val) && val >= 0) {
-      setQuantity(e.target.value)
-    }
   }
   const handleBlur = () => {
     const val = Number(quantity)
@@ -61,13 +46,6 @@ const CartItem = ({
     }
   }
 
-  useEffect(() => {
-    // Reset the quantity state if the item quantity changes
-    if (item.quantity !== Number(quantity)) {
-      setQuantity(item.quantity)
-    }
-  }, [item.quantity])
-
   return (
     <li
       className={cn('flex flex-row space-x-8 py-8', {
@@ -77,7 +55,7 @@ const CartItem = ({
       <div className="w-16 h-16 bg-violet relative overflow-hidden">
         <Image
           className={s.productImage}
-          src={item.image_url}
+          src={item.image[0]}
           width={150}
           height={150}
           alt="Product Image"
@@ -92,29 +70,9 @@ const CartItem = ({
             {item.name}
           </span>
         </Link>
-
-        <div className="flex items-center">
-          <button type="button" onClick={() => increaseQuantity(-1)}>
-            <Minus width={18} height={18} />
-          </button>
-          <label>
-            <input
-              type="number"
-              max={99}
-              min={0}
-              className={s.quantity}
-              value={quantity}
-              onChange={handleQuantity}
-              onBlur={handleBlur}
-            />
-          </label>
-          <button type="button" onClick={() => increaseQuantity(1)}>
-            <Plus width={18} height={18} />
-          </button>
-        </div>
       </div>
       <div className="flex flex-col justify-between space-y-2 text-base">
-        <span>{price}</span>
+        <span>{item.price}</span>
         <button className="flex justify-end" onClick={handleRemove}>
           <Trash />
         </button>

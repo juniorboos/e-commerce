@@ -35,7 +35,7 @@ export async function getStaticProps({
 
   return {
     props: { ...defatultPageProps, pages, page },
-    revalidate: 60 * 60, // Every hour
+    revalidate: 10 * 60 * 1000, // Every hour
   }
 }
 

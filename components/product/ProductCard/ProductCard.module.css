@@ -100,7 +100,7 @@
 }
 
 .productTitle {
-  @apply pt-0 max-w-full w-full leading-extra-loose;
+  @apply pt-0 max-w-full w-full leading-extra-loose truncate;
   font-size: 2rem;
   letter-spacing: 0.4px;
 
@@ -125,12 +125,14 @@
 .imageContainer {
   @apply flex items-center justify-center;
   overflow: hidden;
+  height: 100%;
 
   & > div {
     min-width: 100%;
+    height: 100%;
   }
 }
 
 .productImage {
-  @apply transform transition-transform duration-500 object-cover scale-120;
+  @apply transform transition-transform duration-500 object-contain scale-110;
 }

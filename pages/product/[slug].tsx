@@ -13,57 +13,41 @@ import { getConfig } from '@bigcommerce/storefront-data-hooks/api'
 import getProduct from '@bigcommerce/storefront-data-hooks/api/operations/get-product'
 import getAllPages from '@bigcommerce/storefront-data-hooks/api/operations/get-all-pages'
 import getAllProductPaths from '@bigcommerce/storefront-data-hooks/api/operations/get-all-product-paths'
+import {
+  getAllProducts,
+  getProductById,
+  getRelatedProducts,
+} from 'pages/api/api'
 
-export async function getStaticProps({
-  params,
-  locale,
-  preview,
-}: GetStaticPropsContext<{ slug: string }>) {
-  const config = getConfig({ locale })
-
-  const { pages } = await getAllPages({ config, preview })
-  const { product } = await getProduct({
-    variables: { slug: params!.slug },
-    config,
-    preview,
-  })
-
-  if (!product) {
-    throw new Error(`Product with slug '${params!.slug}' not found`)
-  }
+export async function getStaticProps({ params }: any) {
+  const product = await getProductById(params.slug)
+  const related = await getRelatedProducts(params.slug)
 
   return {
-    props: { pages, product },
-    revalidate: 200,
+    props: { product: product, related: related },
   }
 }
 
-export async function getStaticPaths({ locales }: GetStaticPathsContext) {
-  const { products } = await getAllProductPaths()
-
+export async function getStaticPaths() {
+  const products = await getAllProducts()
   return {
-    paths: locales
-      ? locales.reduce<string[]>((arr, locale) => {
-          // Add a product path for every locale
-          products.forEach((product) => {
-            arr.push(`/${locale}/product${product.node.path}`)
-          })
-          return arr
-        }, [])
-      : products.map((product) => `/product${product.node.path}`),
-    fallback: 'blocking',
+    paths: products.map((product: any) => {
+      return { params: { slug: product.id.toString() } }
+    }),
+    fallback: true,
   }
 }
 
 export default function Slug({
   product,
+  related,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const router = useRouter()
 
   return router.isFallback ? (
     <h1>Loading...</h1> // TODO (BC) Add Skeleton Views
   ) : (
-    <ProductView product={product} />
+    <ProductView product={product} related={related} />
   )
 }
 

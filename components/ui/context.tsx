@@ -8,6 +8,7 @@ export interface State {
   displayToast: boolean
   modalView: string
   toastText: string
+  cartItems: Array<any>
 }
 
 const initialState = {
@@ -17,6 +18,7 @@ const initialState = {
   modalView: 'LOGIN_VIEW',
   displayToast: false,
   toastText: '',
+  cartItems: [],
 }
 
 type Action =
@@ -52,6 +54,13 @@ type Action =
       type: 'SET_MODAL_VIEW'
       view: MODAL_VIEWS
     }
+  | {
+      type: 'ADD_CART_ITEM'
+      item: any
+    }
+  | {
+      type: 'RESET_CART'
+    }
 
 type MODAL_VIEWS = 'SIGNUP_VIEW' | 'LOGIN_VIEW' | 'FORGOT_VIEW'
 type ToastText = string
@@ -62,6 +71,18 @@ UIContext.displayName = 'UIContext'
 
 function uiReducer(state: State, action: Action) {
   switch (action.type) {
+    case 'ADD_CART_ITEM': {
+      return {
+        ...state,
+        cartItems: [...state.cartItems, action.item],
+      }
+    }
+    case 'RESET_CART': {
+      return {
+        ...state,
+        cartItems: [],
+      }
+    }
     case 'OPEN_SIDEBAR': {
       return {
         ...state,
@@ -149,6 +170,14 @@ export const UIProvider: FC = (props) => {
   const setModalView = (view: MODAL_VIEWS) =>
     dispatch({ type: 'SET_MODAL_VIEW', view })
 
+  const addCartItem = (item: any) => dispatch({ type: 'ADD_CART_ITEM', item })
+
+  const resetCart = () => dispatch({ type: 'RESET_CART' })
+
+  const getCartItems = () => {
+    return state.cartItems
+  }
+
   const value = useMemo(
     () => ({
       ...state,
@@ -163,6 +192,9 @@ export const UIProvider: FC = (props) => {
       setModalView,
       openToast,
       closeToast,
+      addCartItem,
+      resetCart,
+      getCartItems,
     }),
     [state]
   )

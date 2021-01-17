@@ -8,9 +8,21 @@ import WishlistButton from '@components/wishlist/WishlistButton'
 import usePrice from '@bigcommerce/storefront-data-hooks/use-price'
 import type { ProductNode } from '@bigcommerce/storefront-data-hooks/api/operations/get-all-products'
 
+interface Product {
+  id: number
+  image: Array<string>
+  price: string
+  about: Array<string>
+  name: string
+  specification: any
+  category: Array<string>
+  brand: any
+  url: string
+}
+
 interface Props {
   className?: string
-  product: ProductNode
+  product: Product
   variant?: 'slim' | 'simple'
   imgWidth: number | string
   imgHeight: number | string
@@ -22,7 +34,7 @@ interface Props {
 
 const ProductCard: FC<Props> = ({
   className,
-  product: p,
+  product,
   variant,
   imgWidth,
   imgHeight,
@@ -31,23 +43,23 @@ const ProductCard: FC<Props> = ({
   imgSizes,
   imgLayout = 'responsive',
 }) => {
-  const src = p.images.edges?.[0]?.node?.urlOriginal!
-  const { price } = usePrice({
-    amount: p.prices?.price?.value,
-    baseAmount: p.prices?.retailPrice?.value,
-    currencyCode: p.prices?.price?.currencyCode!,
-  })
+  // const src = p.images.edges?.[0]?.node?.urlOriginal!
+  // const { price } = usePrice({
+  //   amount: p.prices?.price?.value,
+  //   baseAmount: p.prices?.retailPrice?.value,
+  //   currencyCode: p.prices?.price?.currencyCode!,
+  // })
 
   return (
-    <Link href={`/product${p.path}`}>
+    <Link href={`/product/${product.id}`}>
       <a
         className={cn(s.root, { [s.simple]: variant === 'simple' }, className)}
       >
         {variant === 'slim' ? (
           <div className="relative overflow-hidden box-border">
-            <div className="absolute inset-0 flex items-center justify-end mr-8 z-20">
-              <span className="bg-black text-white inline-block p-3 font-bold text-xl break-words">
-                {p.name}
+            <div className="absolute inset-0 flex items-center justify-center z-20">
+              <span className="truncate bg-black text-white inline-block p-3 font-bold text-xl break-words">
+                {product.name}
               </span>
             </div>
             <Image
@@ -58,8 +70,9 @@ const ProductCard: FC<Props> = ({
               layout={imgLayout}
               loading={imgLoading}
               priority={imgPriority}
-              src={p.images.edges?.[0]?.node.urlOriginal!}
-              alt={p.images.edges?.[0]?.node.altText || 'Product Image'}
+              src={product.image[0]}
+              className={s.productImage}
+              alt={'Product Image'}
             />
           </div>
         ) : (
@@ -68,26 +81,22 @@ const ProductCard: FC<Props> = ({
             <div className="flex flex-row justify-between box-border w-full z-20 absolute">
               <div className="absolute top-0 left-0 pr-16 max-w-full">
                 <h3 className={s.productTitle}>
-                  <span>{p.name}</span>
+                  <span>{product.name}</span>
                 </h3>
-                <span className={s.productPrice}>{price}</span>
+                <span className={s.productPrice}>{product.price}</span>
               </div>
-              <WishlistButton
-                className={s.wishlistButton}
-                productId={p.entityId}
-                variant={p.variants.edges?.[0]!}
-              />
+              {/* <WishlistButton className={s.wishlistButton} /> */}
             </div>
             <div className={s.imageContainer}>
               <Image
                 quality="85"
-                src={src}
-                alt={p.name}
+                src={product.image[0]}
+                alt={product.name}
                 className={s.productImage}
                 width={imgWidth}
                 sizes={imgSizes}
                 height={imgHeight}
-                layout={imgLayout}
+                // layout={imgLayout}
                 loading={imgLoading}
                 priority={imgPriority}
               />

@@ -19,17 +19,19 @@ import {
   getDesignerPath,
   useSearchMeta,
 } from '@lib/search'
+import { getAllProducts, getCategories, getCategoryProducts } from './api/api'
 
-export async function getStaticProps({
-  preview,
-  locale,
-}: GetStaticPropsContext) {
-  const config = getConfig({ locale })
-  const { pages } = await getAllPages({ config, preview })
-  const { categories, brands } = await getSiteInfo({ config, preview })
+interface Category {
+  name: string
+  total: number
+}
+
+export async function getStaticProps() {
+  const categories = await getCategories()
+  const allProducts = await getAllProducts()
 
   return {
-    props: { pages, categories, brands },
+    props: { categories, allProducts },
   }
 }
 
@@ -42,10 +44,12 @@ const SORT = Object.entries({
 
 export default function Search({
   categories,
-  brands,
+  allProducts,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const [activeFilter, setActiveFilter] = useState('')
   const [toggleFilter, setToggleFilter] = useState(false)
+  const [products, setProducts] = useState<any>(allProducts)
+  const [activeCategory, setActiveCategory] = useState<any>(null)
 
   const router = useRouter()
   const { asPath } = router
@@ -55,29 +59,17 @@ export default function Search({
   // of those is selected
   const query = filterQuery({ sort })
 
-  const { pathname, category, brand } = useSearchMeta(asPath)
-  const activeCategory = categories.find(
-    (cat) => getSlug(cat.path) === category
-  )
-  const activeBrand = brands.find(
-    (b) => getSlug(b.node.path) === `brands/${brand}`
-  )?.node
+  const { pathname, brand } = useSearchMeta(asPath)
 
-  const { data } = useSearch({
-    search: typeof q === 'string' ? q : '',
-    categoryId: activeCategory?.entityId,
-    brandId: activeBrand?.entityId,
-    sort: typeof sort === 'string' ? sort : '',
-  })
+  const handleClick = () => {
+    setProducts(allProducts)
+  }
 
-  const handleClick = (event: any, filter: string) => {
-    if (filter !== activeFilter) {
-      setToggleFilter(true)
-    } else {
-      setToggleFilter(!toggleFilter)
-    }
-
-    setActiveFilter(filter)
+  const searchProducts = async (category: Category) => {
+    const data = await getCategoryProducts(category)
+    console.log(data)
+    setActiveCategory(category)
+    setProducts(data)
   }
 
   return (
@@ -140,7 +132,7 @@ export default function Search({
                         href={{ pathname: getCategoryPath('', brand), query }}
                       >
                         <a
-                          onClick={(e) => handleClick(e, 'categories')}
+                          onClick={() => handleClick()}
                           className={
                             'block lg:inline-block px-4 py-2 lg:p-0 lg:my-2 lg:mx-4'
                           }
@@ -149,131 +141,25 @@ export default function Search({
                         </a>
                       </Link>
                     </li>
-                    {categories.map((cat) => (
+                    {categories.map((cat: any) => (
                       <li
-                        key={cat.path}
+                        key={cat.name}
                         className={cn(
                           'block text-sm leading-5 text-gray-700 hover:bg-gray-100 lg:hover:bg-transparent hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900',
                           {
-                            underline:
-                              activeCategory?.entityId === cat.entityId,
+                            underline: activeCategory?.name === cat.name,
                           }
                         )}
                       >
-                        <Link
-                          href={{
-                            pathname: getCategoryPath(cat.path, brand),
-                            query,
-                          }}
-                        >
+                        <Link href="">
                           <a
-                            onClick={(e) => handleClick(e, 'categories')}
+                            // onClick={(e) => handleClick(e, 'categories')}
+                            onClick={() => searchProducts(cat)}
                             className={
                               'block lg:inline-block px-4 py-2 lg:p-0 lg:my-2 lg:mx-4'
                             }
                           >
-                            {cat.name}
-                          </a>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Designs */}
-          <div className="relative inline-block w-full">
-            <div className="lg:hidden mt-3">
-              <span className="rounded-md shadow-sm">
-                <button
-                  type="button"
-                  onClick={(e) => handleClick(e, 'brands')}
-                  className="flex justify-between w-full rounded-sm border border-gray-300 px-4 py-3 bg-white text-sm leading-5 font-medium text-gray-900 hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-50 active:text-gray-800 transition ease-in-out duration-150"
-                  id="options-menu"
-                  aria-haspopup="true"
-                  aria-expanded="true"
-                >
-                  {activeBrand?.name
-                    ? `Design: ${activeBrand?.name}`
-                    : 'All Designs'}
-                  <svg
-                    className="-mr-1 ml-2 h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </span>
-            </div>
-            <div
-              className={`origin-top-left absolute lg:relative left-0 mt-2 w-full rounded-md shadow-lg lg:shadow-none z-10 mb-10 lg:block ${
-                activeFilter !== 'brands' || toggleFilter !== true
-                  ? 'hidden'
-                  : ''
-              }`}
-            >
-              <div className="rounded-sm bg-white shadow-xs lg:bg-none lg:shadow-none">
-                <div
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="options-menu"
-                >
-                  <ul>
-                    <li
-                      className={cn(
-                        'block text-sm leading-5 text-gray-700 lg:text-base lg:no-underline lg:font-bold lg:tracking-wide hover:bg-gray-100 lg:hover:bg-transparent hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900',
-                        {
-                          underline: !activeBrand?.name,
-                        }
-                      )}
-                    >
-                      <Link
-                        href={{
-                          pathname: getDesignerPath('', category),
-                          query,
-                        }}
-                      >
-                        <a
-                          onClick={(e) => handleClick(e, 'brands')}
-                          className={
-                            'block lg:inline-block px-4 py-2 lg:p-0 lg:my-2 lg:mx-4'
-                          }
-                        >
-                          All Designers
-                        </a>
-                      </Link>
-                    </li>
-                    {brands.flatMap(({ node }) => (
-                      <li
-                        key={node.path}
-                        className={cn(
-                          'block text-sm leading-5 text-gray-700 hover:bg-gray-100 lg:hover:bg-transparent hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900',
-                          {
-                            underline: activeBrand?.entityId === node.entityId,
-                          }
-                        )}
-                      >
-                        <Link
-                          href={{
-                            pathname: getDesignerPath(node.path, category),
-                            query,
-                          }}
-                        >
-                          <a
-                            onClick={(e) => handleClick(e, 'brands')}
-                            className={
-                              'block lg:inline-block px-4 py-2 lg:p-0 lg:my-2 lg:mx-4'
-                            }
-                          >
-                            {node.name}
+                            {cat.name} ({cat.total})
                           </a>
                         </Link>
                       </li>
@@ -286,37 +172,20 @@ export default function Search({
         </div>
         {/* Products */}
         <div className="col-span-8 order-3 lg:order-none">
-          {(q || activeCategory || activeBrand) && (
+          {(q || activeCategory) && (
             <div className="mb-12 transition ease-in duration-75">
-              {data ? (
+              {products ? (
                 <>
                   <span
-                    className={cn('animated', {
-                      fadeIn: data.found,
-                      hidden: !data.found,
-                    })}
+                  // className={cn('animated', {
+                  //   fadeIn: products.found,
+                  //   hidden: !products.found,
+                  // })}
                   >
-                    Showing {data.products.length} results{' '}
+                    Showing {products.length} results{' '}
                     {q && (
                       <>
                         for "<strong>{q}</strong>"
-                      </>
-                    )}
-                  </span>
-                  <span
-                    className={cn('animated', {
-                      fadeIn: !data.found,
-                      hidden: data.found,
-                    })}
-                  >
-                    {q ? (
-                      <>
-                        There are no products that match "<strong>{q}</strong>"
-                      </>
-                    ) : (
-                      <>
-                        There are no products that match the selected category &
-                        designer
                       </>
                     )}
                   </span>
@@ -331,14 +200,14 @@ export default function Search({
             </div>
           )}
 
-          {data ? (
+          {products ? (
             <Grid layout="normal">
-              {data.products.map(({ node }) => (
+              {products.map((product: any) => (
                 <ProductCard
                   variant="simple"
-                  key={node.path}
+                  key={product.id}
                   className="animated fadeIn"
-                  product={node}
+                  product={product}
                   imgWidth={480}
                   imgHeight={480}
                 />

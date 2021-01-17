@@ -61,7 +61,7 @@ const Layout: FC<Props> = ({ children, pageProps }) => {
       <div className={cn(s.root)}>
         <Navbar />
         <main className="fit">{children}</main>
-        <Footer pages={pageProps.pages} />
+        {/* <Footer pages={pageProps.pages} /> */}
 
         <Sidebar open={displaySidebar} onClose={closeSidebar}>
           <CartSidebarView />

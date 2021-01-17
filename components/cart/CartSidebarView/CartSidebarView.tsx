@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import cn from 'classnames'
 import { UserNav } from '@components/common'
 import { Button } from '@components/ui'
@@ -8,35 +8,44 @@ import useCart from '@bigcommerce/storefront-data-hooks/cart/use-cart'
 import usePrice from '@bigcommerce/storefront-data-hooks/use-price'
 import CartItem from '../CartItem'
 import s from './CartSidebarView.module.css'
+import { checkout } from 'pages/api/api'
 
 const CartSidebarView: FC = () => {
-  const { closeSidebar } = useUI()
-  const { data, isEmpty } = useCart()
-  const { price: subTotal } = usePrice(
-    data && {
-      amount: data.base_amount,
-      currencyCode: data.currency.code,
-    }
-  )
-  const { price: total } = usePrice(
-    data && {
-      amount: data.cart_amount,
-      currencyCode: data.currency.code,
-    }
-  )
-  const handleClose = () => closeSidebar()
+  const { closeSidebar, getCartItems, resetCart } = useUI()
 
-  const items = data?.line_items.physical_items ?? []
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState(false)
+  const [total, setTotal] = useState(0)
 
-  const error = null
-  const success = null
+  const handleClose = () => {
+    if (success) resetCart()
+    closeSidebar()
+  }
+
+  const items = getCartItems()
+
+  const finishCheckout = () => {
+    const itemsId = items.map((item: any) => {
+      return item.id
+    })
+
+    checkout(itemsId)
+    setSuccess(true)
+  }
+
+  useEffect(() => {
+    const prices = items.map((item: any) => {
+      return Number(item.price.substring(1))
+    })
+    setTotal(prices.reduce((a: number, b: number) => a + b, 0).toFixed(2))
+  }, [items])
 
   return (
     <div
       className={cn(s.root, {
         [s.empty]: error,
         [s.empty]: success,
-        [s.empty]: isEmpty,
+        [s.empty]: items.length === 0,
       })}
     >
       <header className="px-4 pt-6 pb-4 sm:px-6">
@@ -56,7 +65,7 @@ const CartSidebarView: FC = () => {
         </div>
       </header>
 
-      {isEmpty ? (
+      {items.length === 0 ? (
         <div className="flex-1 px-4 flex flex-col justify-center items-center">
           <span className="border border-dashed border-primary rounded-full flex items-center justify-center w-16 h-16 p-12 bg-secondary text-secondary">
             <Bag className="absolute" />
@@ -64,9 +73,6 @@ const CartSidebarView: FC = () => {
           <h2 className="pt-6 text-2xl font-bold tracking-wide text-center">
             Your cart is empty
           </h2>
-          <p className="text-accents-3 px-10 text-center pt-2">
-            Biscuit oat cake wafer icing ice cream tiramisu pudding cupcake.
-          </p>
         </div>
       ) : error ? (
         <div className="flex-1 px-4 flex flex-col justify-center items-center">
@@ -90,42 +96,24 @@ const CartSidebarView: FC = () => {
       ) : (
         <>
           <div className="px-4 sm:px-6 flex-1">
-            <h2 className="pt-1 pb-4 text-2xl leading-7 font-bold text-base tracking-wide">
+            <h2 className="pt-1 pb-4 text-2xl leading-7 font-bold tracking-wide ">
               My Cart
             </h2>
             <ul className="py-6 space-y-6 sm:py-0 sm:space-y-0 sm:divide-y sm:divide-accents-3 border-t border-accents-3">
-              {items.map((item) => (
-                <CartItem
-                  key={item.id}
-                  item={item}
-                  currencyCode={data?.currency.code!}
-                />
+              {items.map((item: any) => (
+                <CartItem key={item.id} item={item} />
               ))}
             </ul>
           </div>
 
-          <div className="flex-shrink-0 px-4  py-5 sm:px-6">
+          <div className="flex-shrink-0 px-4 py-5 sm:px-6">
             <div className="border-t border-accents-3">
-              <ul className="py-3">
-                <li className="flex justify-between py-1">
-                  <span>Subtotal</span>
-                  <span>{subTotal}</span>
-                </li>
-                <li className="flex justify-between py-1">
-                  <span>Taxes</span>
-                  <span>Calculated at checkout</span>
-                </li>
-                <li className="flex justify-between py-1">
-                  <span>Estimated Shipping</span>
-                  <span className="font-bold tracking-wide">FREE</span>
-                </li>
-              </ul>
               <div className="flex justify-between border-t border-accents-3 py-3 font-bold mb-10">
                 <span>Total</span>
-                <span>{total}</span>
+                <span>${total}</span>
               </div>
             </div>
-            <Button href="/checkout" Component="a" width="100%">
+            <Button onClick={() => finishCheckout()} Component="a" width="100%">
               Proceed to Checkout
             </Button>
           </div>
