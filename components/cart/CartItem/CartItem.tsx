@@ -3,39 +3,14 @@ import cn from 'classnames'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Trash, Plus, Minus } from '@components/icons'
-import usePrice from '@bigcommerce/storefront-data-hooks/use-price'
-import useUpdateItem from '@bigcommerce/storefront-data-hooks/cart/use-update-item'
-import useRemoveItem from '@bigcommerce/storefront-data-hooks/cart/use-remove-item'
 import s from './CartItem.module.css'
 import { useUI } from '@components/ui/context'
 
 const CartItem = ({ item }: { item: any }) => {
   const { removeCartItem } = useUI()
-  const updateItem = useUpdateItem(item)
-  const removeItem = useRemoveItem()
   const [quantity, setQuantity] = useState(1)
   const [removing, setRemoving] = useState(false)
-  const updateQuantity = async (val: number) => {
-    await updateItem({ quantity: val })
-  }
-  const handleQuantity = (e: ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value)
-  }
-  const handleBlur = () => {
-    const val = Number(quantity)
 
-    if (val !== item.quantity) {
-      updateQuantity(val)
-    }
-  }
-  const increaseQuantity = (n = 1) => {
-    const val = Number(quantity) + n
-
-    if (Number.isInteger(val) && val >= 0) {
-      setQuantity(val)
-      updateQuantity(val)
-    }
-  }
   const handleRemove = async () => {
     removeCartItem(item.id)
   }

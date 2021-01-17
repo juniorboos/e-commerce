@@ -9,9 +9,6 @@ import { useAcceptCookies } from '@lib/hooks/useAcceptCookies'
 import { Sidebar, Button, Modal, LoadingDots } from '@components/ui'
 import { CartSidebarView } from '@components/cart'
 
-import { CommerceProvider } from '@bigcommerce/storefront-data-hooks'
-import type { Page } from '@bigcommerce/storefront-data-hooks/api/operations/get-all-pages'
-
 const Loading = () => (
   <div className="w-80 h-80 flex items-center text-center justify-center p-3">
     <LoadingDots />
@@ -39,13 +36,9 @@ const FeatureBar = dynamic(
   dynamicProps
 )
 
-interface Props {
-  pageProps: {
-    pages?: Page[]
-  }
-}
+interface Props {}
 
-const Layout: FC<Props> = ({ children, pageProps }) => {
+const Layout: FC<Props> = ({ children }) => {
   const {
     displaySidebar,
     displayModal,
@@ -57,33 +50,31 @@ const Layout: FC<Props> = ({ children, pageProps }) => {
   const { locale = 'en-US' } = useRouter()
 
   return (
-    <CommerceProvider locale={locale}>
-      <div className={cn(s.root)}>
-        <Navbar />
-        <main className="fit">{children}</main>
-        {/* <Footer pages={pageProps.pages} /> */}
+    <div className={cn(s.root)}>
+      <Navbar />
+      <main className="fit">{children}</main>
+      {/* <Footer pages={pageProps.pages} /> */}
 
-        <Sidebar open={displaySidebar} onClose={closeSidebar}>
-          <CartSidebarView />
-        </Sidebar>
+      <Sidebar open={displaySidebar} onClose={closeSidebar}>
+        <CartSidebarView />
+      </Sidebar>
 
-        <Modal open={displayModal} onClose={closeModal}>
-          {modalView === 'LOGIN_VIEW' && <LoginView />}
-          {modalView === 'SIGNUP_VIEW' && <SignUpView />}
-          {modalView === 'FORGOT_VIEW' && <ForgotPassword />}
-        </Modal>
+      <Modal open={displayModal} onClose={closeModal}>
+        {modalView === 'LOGIN_VIEW' && <LoginView />}
+        {modalView === 'SIGNUP_VIEW' && <SignUpView />}
+        {modalView === 'FORGOT_VIEW' && <ForgotPassword />}
+      </Modal>
 
-        <FeatureBar
-          title="This site uses cookies to improve your experience. By clicking, you agree to our Privacy Policy."
-          hide={acceptedCookies}
-          action={
-            <Button className="mx-5" onClick={() => onAcceptCookies()}>
-              Accept cookies
-            </Button>
-          }
-        />
-      </div>
-    </CommerceProvider>
+      {/* <FeatureBar
+        title="This site uses cookies to improve your experience. By clicking, you agree to our Privacy Policy."
+        hide={acceptedCookies}
+        action={
+          <Button className="mx-5" onClick={() => onAcceptCookies()}>
+            Accept cookies
+          </Button>
+        }
+      /> */}
+    </div>
   )
 }
 
